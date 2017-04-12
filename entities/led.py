@@ -16,10 +16,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-__author__ = 'Spoony'
-__version__  = 'version 0.0.1'
-__license__  = 'Copyright (c) 2015 NXEZ.COM'
-
 import RPi.GPIO as GPIO
 import time
 from threading import Thread
@@ -130,7 +126,7 @@ class Led(object):
                 pulse_thread.setDaemon(True)
                 pulse_thread.start()
             except:
-                print 'Error: Unable to start thread by Led'
+                print('Error: Unable to start thread by Led')
         self.__is_pulse = True
         self.__is_on = True
 
