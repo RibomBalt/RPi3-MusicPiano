@@ -67,14 +67,14 @@ class note:
     作为键盘事件传入的信息，等待主线程处理
     '''
 
-    def __init__(self, instrument: str, tune: str, isStart: bool = True, volume: float = 1.0):
+    def __init__(self, channel, tune: str, isStart: bool = True, volume: float = 1.0):
         '''
         初始化一个音符
-        :param instrument: 一个字符串，表示乐器名。和音源文件夹名字对应
+        :param channel: music_channel对象，表示发出此音符的频道，借以获得乐器
         :param tune: 一个字符串，表示音符音名。和音源文件名字对应
         :param isStart: 是否开始或结束。可能会同时传入同一个乐器两次开始符。
         '''
-        self.instrument = instrument
+        self.channel = channel
         self.tune = tune
         self.isStart = isStart
         self.volume = volume
@@ -97,7 +97,7 @@ class note:
         :return: 
         '''
         return 'instrument: %s, tune: %s, isStart: %s, volume: %s' \
-               % (self.instrument, self.tune, self.isStart, self.volume)
+               % (self.channel.instrument, self.tune, self.isStart, self.volume)
 
 
 class music_channel:
@@ -108,22 +108,26 @@ class music_channel:
 
     # TODO 添加一个信息，可以在创建音轨时确定的特异信息，类似Hash，与音符一起送进队列，并且和对象本身可以互查
 
-    def __init__(self, instrument=list(instruments.keys())[0], source: str = 'KEY'):
+    def __init__(self, instrument='piano', source: str = 'KEY'):
         '''
         初始化混音器，初始化混音列表
         :param instrument: 乐器种类，用一个字符串表示。键盘音轨可以更换。
         :param source: 音轨输入源，字符串KEY或FILE
         '''
         self.source = source
-        # 保证乐器名合法
-        assert instrument in instruments.keys(), 'No Such Instrument Here!'
-        self.instrument = instrument
+        # 存放已编译好的声音文件，即mixer.channel对象的字典
+        self.sound_dict = {}
+        # 设置乐器
+        self.instrument = ''
+        self.set_instrument(instrument)
         # 由于混音器统一调度，需要对接队列
         self.queue = None
+        # TODO 解耦，可以不需要这个bind变量
         # 是否已和某个混音器结合。
         self.bind = False
         # 音量,0-1
         self.volume = 1.0
+        
 
     def set_instrument(self, instrument: str):
         '''
@@ -131,7 +135,21 @@ class music_channel:
         :param instrument: 一个字符串，表示乐器种类
         :return: 
         '''
+        # TODO 将所有导入音频文件的操作放在这一步
+        # 保证乐器名合法
+        assert instrument in instruments.keys(), 'No Such Instrument Here!'
         self.instrument = instrument
+        self.sound_dict.clear()
+        dir_name = './%s'%(instrument)
+        # 对声音字典进行预处理
+        for file_name in os.listdir(dir_name):
+            # 获取音乐完整的相对路径
+            path = '/'.join([dir_name, file_name])
+            # 获取音源的音名
+            note_name = os.path.splitext(file_name)[0]
+            # 解码声音文件
+            channel = pygame.mixer.Sound(path)
+            self.sound_dict[note_name] = channel
         return None
 
     def key_input(self):
@@ -164,11 +182,11 @@ class music_channel:
                             if octave != 0:
                                 # 对八度标识符的调整
                                 note_name = str(octave + int(note_name[0])) + note_name[1:]
-                            if note_name + '.ogg' not in instruments[self.instrument]:
+                            if note_name not in self.sound_dict.keys():
                                 # 如果没有在音符列表中，则直接放弃
                                 continue
                             # 我们终于做好了预处理，可以创建音符了！
-                            newNote = note(self.instrument, note_name, True, self.volume)
+                            newNote = note(self, note_name, True, self.volume)
                             # 放进“正在播放”字典中
                             down_dict[event.key] = newNote
                             # 将音符和相关信息放进队列
@@ -276,14 +294,14 @@ class music_mixer:
         # TODO 拨码开关可以打断此线程。在whileTRUE第一句对拨码事件判断
         startTime = time.time()
         while True:
-
+    
             item = self.musicQueue.get()
             # 获取的item应该是一个note对象，获取其状态
             assert isinstance(item, note), 'Not A Note Object!'
             if item.isStart:
                 # 是开始的音符，获取channel对象
-                sound_location = './' + item.instrument + '/' + item.tune + '.ogg'
-                sound = pygame.mixer.Sound(sound_location)
+                # TODO 这里要调用相应的频道的字典，获取channel
+                sound = item.channel.sound_dict[item.tune]
                 # 获取开始时间戳
                 timing = time.time() - startTime
                 self.playing_dict[note] = (sound, timing)
@@ -309,12 +327,13 @@ class music_mixer:
 
 if __name__ == "__main__":
     pygame.init()
-    screen = pygame.display.set_mode((640, 480), 0, 32)
+    # screen = pygame.display.set_mode((640, 480), 0, 32)
     mixer = music_mixer()
     key_channel = music_channel(instrument='piano')
     mixer.add_channel(key_channel)
     mixer_thread=threading.Thread(target=mixer.sound_process)
     key_thread = threading.Thread(target=key_channel.key_input)
+    screen = pygame.display.set_mode((640, 480), 0, 32)
     mixer_thread.start()
     # key_thread.start()
     key_channel.key_input()
