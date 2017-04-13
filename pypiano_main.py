@@ -5,12 +5,17 @@ import threading
 import time
 import queue
 import os
+# 判断是否为树莓派操作系统
+# TODO 可能修改这个地方，让全文调用不出现混乱
+isRPi = os.name == 'posix'
+if isRPi:
+    import Piano_SAKS
 
 # 扫描时间差，参考：人耳最小分辨时间差为0.1s
 TICK = 0.01
 
 # 键位表字典，将pygame中按键常量映射为音名。传入二元元组，包含键、空格是否按下。默认八度符为0情况
-# TODO 根据音符填充字典
+# TODO 根据音符填充字典，添加右手小指
 key2note = {
     (K_z, False): '3C',
     (K_x, False): '3D',
@@ -163,6 +168,8 @@ class music_channel:
         '''
         # 八度标识符
         octave = 0
+        # 已定义过判断系统的变量
+        global isRPi
         assert self.source == 'KEY'
         # 记录当前有哪些键被按下的字典，值为该键对应的发出的note对象，已备release时发出
         pygame.event.set_allowed([KEYUP,KEYDOWN,QUIT])
@@ -294,6 +301,7 @@ class music_mixer:
         '''
         # TODO 拨码开关可以打断此线程。在whileTRUE第一句对拨码事件判断
         startTime = time.time()
+        global isRPi
         while True:
     
             item = self.musicQueue.get()
@@ -312,6 +320,8 @@ class music_mixer:
                 sound.play()
                 # TODO 录音状态下，将该部分写入缓冲区
                 # TODO 添加GPIO操作
+                if isRPi:
+                    Piano_SAKS.ledOper(item.tune)
 
             else:
                 # 是结束的音符，找到相应的音符进行结束处理
