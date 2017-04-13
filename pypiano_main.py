@@ -328,8 +328,8 @@ class music_mixer:
                     if isRPi:
                         Piano_SAKS.ledOn(item.tune)
                         Piano_SAKS.digitalPlay(item.tune)
-                except:
-                    pass
+                except Exception as e:
+                    print(e)
 
 
             else:
@@ -342,8 +342,8 @@ class music_mixer:
                     # 添加GPIO操作，开灯关灯数字显示
                     if isRPi:
                         Piano_SAKS.ledOff(item.tune)
-                except:
-                    pass
+                except Exception as e:
+                    print(e)
 
 
 if __name__ == "__main__":
