@@ -96,6 +96,7 @@ def display_count():
     global button_time
     while not stop:
         SAKS.digital_display.show(str(button_time % 10000).zfill(4))
+        time.sleep(0.1)
 
 
 def cleanUp():
