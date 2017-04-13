@@ -386,5 +386,5 @@ if __name__ == "__main__":
     # key_thread.start()
     if isRPi:
         # 展示时间的操作
-        threading.Thread(target=Piano_SAKS.displayTime, args=(True,)).start()
+        threading.Thread(target=Piano_SAKS.display_count, args=(True,)).start()
     key_channel.key_input()

@@ -88,7 +88,7 @@ def displayTime(relative = True):
             SAKS.digital_display.show(timeStr)
         cleanUp()
 
-def display_button():
+def display_count():
     '''
     展示按键次数的程序
     :return: 
