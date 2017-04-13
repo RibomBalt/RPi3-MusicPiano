@@ -244,10 +244,11 @@ class music_channel:
         '''
         if isRPi:
             Piano_SAKS.stop = True
+            # 等待秒表完成
+            time.sleep(1)
             Piano_SAKS.cleanUp()
         pygame.quit()
-        # 等待秒表完成
-        time.sleep(1)
+
         exit()
 
 class music_mixer:
