@@ -308,6 +308,10 @@ class music_mixer:
         # TODO 拨码开关可以打断此线程。在whileTRUE第一句对拨码事件判断
         startTime = time.time()
         global isRPi
+        if isRPi:
+            # 展示时间的操作
+            threading.Thread(target=Piano_SAKS.displayTime, args=(True,)).start()
+
         while True:
     
             item = self.musicQueue.get()
@@ -329,7 +333,6 @@ class music_mixer:
                     # 添加GPIO操作，包括关灯开灯和数字显示
                     if isRPi:
                         threading.Thread(target=Piano_SAKS.ledOn, args=(item.tune,)).start()
-                        threading.Thread(target=Piano_SAKS.displayTime, args=(True,)).start()
                 except Exception as e:
                     print(e)
 
