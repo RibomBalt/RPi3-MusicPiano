@@ -12,5 +12,5 @@ for x in ('6.6.6.6', '23.33', '8888', '8#8#.','####'):
     time.sleep(0.5)
     
 # 测试蜂鸣器
-saks.buzzer.beep(0.1)
+saks.buzzer.beep(0.02)
 print('测试完成')
