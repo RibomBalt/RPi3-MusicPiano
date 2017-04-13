@@ -23,6 +23,7 @@ key2note = {
     (K_n, False): '3G',
     (K_m, False): '3A',
     (K_COMMA, False): '3B',
+    (K_PERIOD, False):'4C',
     (K_a, False): '4C',
     (K_s, False): '4D',
     (K_d, False): '4E',
@@ -30,6 +31,7 @@ key2note = {
     (K_j, False): '4G',
     (K_k, False): '4A',
     (K_l, False): '4B',
+    (K_SEMICOLON, False): '5C',
     (K_q, False): '5C',
     (K_w, False): '5D',
     (K_e, False): '5E',
@@ -37,6 +39,7 @@ key2note = {
     (K_i, False): '5G',
     (K_o, False): '5A',
     (K_p, False): '5B',
+    (K_LEFTBRACKET, False): '6C',
     (K_z, True):'3C+',
     (K_x, True):'3D+',
     (K_c, True):'3F',
@@ -44,6 +47,7 @@ key2note = {
     (K_n, True):'3G+',
     (K_m, True):'3A+',
     (K_COMMA, True):'4C',
+    (K_PERIOD, True):'4C+',
     (K_a, True):'4C+',
     (K_s, True):'4D+',
     (K_d, True):'4F',
@@ -51,6 +55,7 @@ key2note = {
     (K_j, True):'4G+',
     (K_k, True):'4A+',
     (K_l, True):'5C',
+    (K_SEMICOLON, True):'5C+',
     (K_q, True):'5C+',
     (K_w, True):'5D+',
     (K_e, True):'5F',
@@ -58,11 +63,12 @@ key2note = {
     (K_i, True):'5G+',
     (K_o, True):'5A+',
     (K_p, True):'6C',
+    (K_LEFTBRACKET, True):'6C+',
 }
 
-# 乐器字典，键为字符串，值为列表，即包含的所有音名
+# 乐器列表
 # TODO 随音源库的丰富，动态添加
-instruments = {'piano': os.listdir(r'./piano'), }
+instruments = ['piano', ]
 
 
 class note:
@@ -142,7 +148,7 @@ class music_channel:
         '''
         # TODO 将所有导入音频文件的操作放在这一步
         # 保证乐器名合法
-        assert instrument in instruments.keys(), 'No Such Instrument Here!'
+        assert instrument in instruments, 'No Such Instrument Here!'
         self.instrument = instrument
         self.sound_dict.clear()
         dir_name = './%s'%(instrument)
@@ -207,6 +213,19 @@ class music_channel:
                         elif event.key == K_ESCAPE:
                             print('正常退出')
                             self.quit()
+                        elif event.key == K_TAB:
+                            # TODO 如果做GUI，则这部分删除，添加鼠标事件
+                            # TAB键用于切换乐器
+                            if isRPi:
+                                # 如果在树莓派上，全部亮起表示正在更换乐器中
+                                Piano_SAKS.SAKS.ledrow.on()
+                            self.sound_dict.clear()
+                            # 获取下一个乐器。暂时不使用GUI调整乐器
+                            newIndex = (instruments.index(self.instrument) + 1) % len(instruments)
+                            self.set_instrument(instruments[newIndex])
+                            if isRPi:
+                                # 关闭树莓派的灯，准备开始读取
+                                Piano_SAKS.SAKS.ledrow.off()
 
                     elif event.type == KEYUP:
                         # 抬起按键，将对应的音符改成松开模式送进队列
