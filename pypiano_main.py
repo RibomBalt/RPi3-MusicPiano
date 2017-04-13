@@ -344,15 +344,14 @@ class music_mixer:
                     timing = time.time() - startTime
                     # TODO 录音状态下，将该部分写入缓冲区
                     # 添加GPIO操作，开灯关灯数字显示
-                    if isRPi:
-                        threading.Thread(target=Piano_SAKS.ledOff, args=(item.tune,)).start()
+                    # if isRPi:
+                    #     threading.Thread(target=Piano_SAKS.ledOff, args=(item.tune,)).start()
                 except Exception as e:
                     print(e)
 
 
 if __name__ == "__main__":
     pygame.init()
-    # screen = pygame.display.set_mode((640, 480), 0, 32)
     mixer = music_mixer()
     key_channel = music_channel(instrument='piano')
     mixer.add_channel(key_channel)
