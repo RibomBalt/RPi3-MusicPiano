@@ -1,11 +1,13 @@
 from sakshat import SAKSHAT
 # from sakspins import SAKSPins as PINS
 import time
+import queue
 
 #Declare the SAKS Board
 SAKS = SAKSHAT()
 soundToNum = {'C':1,'D':2,'E':3,'F':4,'G':5,'A':6,'B':7,'+':0}
 temp = None
+on_lights = queue.Queue()
 stop = False
 
 def led_off_first(func):
@@ -26,23 +28,29 @@ def led_off_after_on(func):
     :return: 
     '''
     def wrapped(string):
-        led_off_first(func)(string)
-        time.sleep(0.1)
-        SAKS.ledrow.set_row([False, False, False, False, False, False, False, False])
-
+        func(string)
+        time.sleep(0.5)
+        temp = on_lights.get()
+        SAKS.ledrow.off_for_index(temp)
+        if temp == 0:
+            temp = on_lights.get()
+            SAKS.ledrow.off_for_index(temp)
+        
     return wrapped
 
 @led_off_after_on
 def ledOn(string):
     #1-7显示音调，0显示升调
-    global temp
     if string[-1] == '+':
         temp = soundToNum[string[-2]]
         SAKS.ledrow.on_for_index(0)
         SAKS.ledrow.on_for_index(temp)
+        on_lights.put(0)
+        on_lights.put(temp)
     else:
         temp = soundToNum[string[-1]]
         SAKS.ledrow.on_for_index(temp)
+        on_lights.put(temp)
 
 def ledOff(string):
     if temp != None:

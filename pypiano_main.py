@@ -195,7 +195,7 @@ class music_channel:
                                 # 如果没有在音符列表中，则直接放弃
                                 continue
                             # 用alt做弱音踏板
-                            self.volume = 0.5 if alt_pressed else 1
+                            self.volume = 0.6 if alt_pressed else 1
                             # 我们终于做好了预处理，可以创建音符了！
                             newNote = note(self, note_name, True, self.volume)
                             # 放进“正在播放”字典中
@@ -246,6 +246,8 @@ class music_channel:
             Piano_SAKS.stop = True
             Piano_SAKS.cleanUp()
         pygame.quit()
+        # 等待秒表完成
+        time.sleep(1)
         exit()
 
 class music_mixer:
