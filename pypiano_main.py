@@ -243,6 +243,7 @@ class music_channel:
         :return: 
         '''
         if isRPi:
+            Piano_SAKS.stop = True
             Piano_SAKS.cleanUp()
         pygame.quit()
         exit()
@@ -308,9 +309,7 @@ class music_mixer:
         # TODO 拨码开关可以打断此线程。在whileTRUE第一句对拨码事件判断
         startTime = time.time()
         global isRPi
-        if isRPi:
-            # 展示时间的操作
-            threading.Thread(target=Piano_SAKS.displayTime, args=(True,)).start()
+
 
         while True:
     
@@ -359,7 +358,10 @@ if __name__ == "__main__":
     mixer.add_channel(key_channel)
     mixer_thread=threading.Thread(target=mixer.sound_process)
     key_thread = threading.Thread(target=key_channel.key_input)
-    screen = pygame.display.set_mode((640, 480), 0, 32)
+    screen = pygame.display.set_mode((320, 240), 0, 32)
     mixer_thread.start()
     # key_thread.start()
+    if isRPi:
+        # 展示时间的操作
+        threading.Thread(target=Piano_SAKS.displayTime, args=(True,)).start()
     key_channel.key_input()
