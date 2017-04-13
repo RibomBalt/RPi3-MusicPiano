@@ -6,6 +6,19 @@ from sakshat import SAKSHAT
 SAKS = SAKSHAT()
 soundToNum = {'C':1,'D':2,'E':3,'F':4,'G':5,'A':6,'B':7,'+':0}
 temp = None
+
+def led_off_first(func):
+    '''
+    装饰器，先关
+    :param func: 
+    :return: 
+    '''
+    def wrapped(string):
+        SAKS.ledrow.set_row([False,False,False,False,False,False,False,False])
+        func(string)
+    return func
+
+@led_off_first
 def ledOn(string):
     #1-7显示音调，0显示升调
     global temp
