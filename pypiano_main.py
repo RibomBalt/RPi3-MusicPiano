@@ -219,6 +219,7 @@ class music_channel:
                             if isRPi:
                                 # 如果在树莓派上，全部亮起表示正在更换乐器中
                                 Piano_SAKS.SAKS.ledrow.on()
+                                Piano_SAKS.button_time = 0
                             self.sound_dict.clear()
                             # 获取下一个乐器。暂时不使用GUI调整乐器
                             newIndex = (instruments.index(self.instrument) + 1) % len(instruments)
@@ -354,6 +355,7 @@ class music_mixer:
                     # 添加GPIO操作，包括关灯开灯和数字显示
                     if isRPi:
                         threading.Thread(target=Piano_SAKS.ledOn, args=(item.tune,)).start()
+                        Piano_SAKS.button_time+=1
                 except Exception as e:
                     print(e)
 
