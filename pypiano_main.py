@@ -326,8 +326,8 @@ class music_mixer:
                     # TODO 录音状态下，将该部分写入缓冲区
                     # 添加GPIO操作，包括关灯开灯和数字显示
                     if isRPi:
-                        Piano_SAKS.ledOn(item.tune)
-                        Piano_SAKS.digitalPlay(item.tune)
+                        threading.Thread(target=Piano_SAKS.ledOn, args=(item.tune,)).start()
+                        threading.Thread(target=Piano_SAKS.digitalPlay, args=(item.tune))
                 except Exception as e:
                     print(e)
 
@@ -341,7 +341,7 @@ class music_mixer:
                     # TODO 录音状态下，将该部分写入缓冲区
                     # 添加GPIO操作，开灯关灯数字显示
                     if isRPi:
-                        Piano_SAKS.ledOff(item.tune)
+                        threading.Thread(target=Piano_SAKS.ledOff, args=(item.tune,)).start()
                 except Exception as e:
                     print(e)
 

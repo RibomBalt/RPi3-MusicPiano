@@ -18,7 +18,7 @@ def ledOn(string):
         SAKS.ledrow.on_for_index(temp)
 
 def ledOff(string):
-    while temp != None:
+    if temp != None:
         SAKS.ledrow.off_for_index(0)
         SAKS.ledrow.off_for_index(temp)
 
