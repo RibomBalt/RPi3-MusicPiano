@@ -6,6 +6,7 @@ import time
 SAKS = SAKSHAT()
 soundToNum = {'C':1,'D':2,'E':3,'F':4,'G':5,'A':6,'B':7,'+':0}
 temp = None
+stop = False
 
 def led_off_first(func):
     '''
@@ -54,14 +55,16 @@ def displayTime(relative = True):
 
     if relative:
         t = 0
-        while True:
-            time.sleep(0.5)
+        while not stop:
+            # 多线程运行，半秒肯定不是半秒
+            time.sleep(0.2)
             t += 1
             timeStr = '%s.%s'%seconds2minute(second=t)
             SAKS.digital_display.show(timeStr)
-            time.sleep(0.5)
+            time.sleep(0.2)
             timeStr = '%s%s' % seconds2minute(second=t)
             SAKS.digital_display.show(timeStr)
+        cleanUp()
 
 def cleanUp():
     SAKS.ledrow.off()
