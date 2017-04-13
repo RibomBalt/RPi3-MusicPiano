@@ -1,6 +1,6 @@
 from sakshat import SAKSHAT
 # from sakspins import SAKSPins as PINS
-# import time
+import time
 
 #Declare the SAKS Board
 SAKS = SAKSHAT()
@@ -41,6 +41,27 @@ def digitalPlay(string):
     else:
         strToDisplay = string[0]+'#'+str(soundToNum[string[1]])+'#'
     SAKS.digital_display.show(strToDisplay)
+
+def displayTime(relative = True):
+    '''
+    由于不能及时显示数字造成混乱，我们决定用这个来作为秒表
+    :return: 
+    '''
+    def seconds2minute(second:int):
+        minute = str.zfill(str((second // 60) % 100), 2)
+        second = str.zfill(str(second % 60), 2)
+        return (minute, second)
+
+    if relative:
+        t = 0
+        while True:
+            time.sleep(0.5)
+            t += 1
+            timeStr = '%s.%s'%seconds2minute(second=t)
+            SAKS.digital_display.show(timeStr)
+            time.sleep(0.5)
+            timeStr = '%s%s' % seconds2minute(second=t)
+            SAKS.digital_display.show(timeStr)
 
 def cleanUp():
     SAKS.ledrow.off()

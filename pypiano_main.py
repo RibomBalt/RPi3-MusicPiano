@@ -329,7 +329,7 @@ class music_mixer:
                     # 添加GPIO操作，包括关灯开灯和数字显示
                     if isRPi:
                         threading.Thread(target=Piano_SAKS.ledOn, args=(item.tune,)).start()
-                        threading.Thread(target=Piano_SAKS.digitalPlay, args=(item.tune,)).start()
+                        threading.Thread(target=Piano_SAKS.displayTime, args=(True,)).start()
                 except Exception as e:
                     print(e)
 
