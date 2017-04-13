@@ -19,7 +19,20 @@ def led_off_first(func):
         func(string)
     return func
 
-@led_off_first
+def led_off_after_on(func):
+    '''
+    仅用于多线程，每次先关后开，隔半秒再关
+    :param func: 
+    :return: 
+    '''
+    def wrapped(string):
+        led_off_first(func)(string)
+        time.sleep(0.1)
+        SAKS.ledrow.set_row([False, False, False, False, False, False, False, False])
+
+    return wrapped
+
+@led_off_after_on
 def ledOn(string):
     #1-7显示音调，0显示升调
     global temp
