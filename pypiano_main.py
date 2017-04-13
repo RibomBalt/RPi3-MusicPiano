@@ -6,7 +6,6 @@ import time
 import queue
 import os
 # 判断是否为树莓派操作系统
-# TODO 可能修改这个地方，让全文调用不出现混乱
 isRPi = os.name == 'posix'
 if isRPi:
     import Piano_SAKS
@@ -183,8 +182,10 @@ class music_channel:
                         if (event.key, False) in key2note.keys():
                             # 如果按下的键在映射列表中，进行操作，
                             # 获得空格是否按下
-
-                            space_pressed = pygame.key.get_pressed()[K_SPACE]
+                            press_list = pygame.key.get_pressed()
+                            space_pressed = press_list[K_SPACE]
+                            alt_pressed = press_list[K_LALT]
+                            del press_list
                             # 获得映射列表对应的音名（未改变八度）
                             note_name = key2note[(event.key, space_pressed)]
                             if octave != 0:
@@ -193,6 +194,8 @@ class music_channel:
                             if note_name not in self.sound_dict.keys():
                                 # 如果没有在音符列表中，则直接放弃
                                 continue
+                            # 用alt做弱音踏板
+                            self.volume = 0.15 if alt_pressed else 1
                             # 我们终于做好了预处理，可以创建音符了！
                             newNote = note(self, note_name, True, self.volume)
                             # 放进“正在播放”字典中
@@ -201,17 +204,10 @@ class music_channel:
 
                             if self.bind:
                                 self.queue.put(newNote)
+                        elif event.key == K_ESCAPE:
+                            print('正常退出')
+                            self.quit()
 
-                        elif event.key == K_LSHIFT:
-                            # 左shift，octave-1
-                            octave -= 1
-                        elif event.key == K_RSHIFT:
-                            # 右SHIFT
-                            octave += 1
-                        elif event.key == K_LCTRL:
-                            self.volume -= 0.1 if self.volume >= 0.1 else 0
-                        elif event.key == K_RCTRL:
-                            self.volume += 0.1 if self.volume <= 0.9 else 0
                     elif event.type == KEYUP:
                         # 抬起按键，将对应的音符改成松开模式送进队列
                         if event.key in down_dict.keys():
@@ -221,15 +217,16 @@ class music_channel:
                             popNote.isStart = False
                             if self.bind:
                                 self.queue.put(popNote)
+                                # print(popNote)
                     elif event.type == QUIT:
-                        pygame.quit()
-                        exit()
+                        self.quit()
                     else:
                         continue
 
         except Exception as e:
             # 异常退出
             print('程序因为某些原因异常关闭！')
+            self.quit()
 
     def file_input(self, readable, queue: queue.Queue):
         '''
@@ -240,6 +237,13 @@ class music_channel:
         :return: 
         '''
 
+    def quit(self):
+        '''
+        退出钢琴
+        :return: 
+        '''
+        pygame.quit()
+        exit()
 
 class music_mixer:
     '''
@@ -308,32 +312,38 @@ class music_mixer:
             # 获取的item应该是一个note对象，获取其状态
             assert isinstance(item, note), 'Not A Note Object!'
             if item.isStart:
-                # 是开始的音符，获取channel对象
-                # TODO 这里要调用相应的频道的字典，获取channel
-                sound = item.channel.sound_dict[item.tune]
-                # 获取开始时间戳
-                timing = time.time() - startTime
-                self.playing_dict[note] = (sound, timing)
-                # TODO 是否加参数进行处理音色
-                # 音量处理
-                sound.set_volume(item.volume)
-                sound.play()
-                # TODO 录音状态下，将该部分写入缓冲区
-                # TODO 添加GPIO操作
-                if isRPi:
-                    Piano_SAKS.ledOper(item.tune)
+                try:
+                    # 是开始的音符，获取channel对象
+                    # TODO 这里要调用相应的频道的字典，获取channel
+                    sound = item.channel.sound_dict[item.tune]
+                    # 获取开始时间戳
+                    timing = time.time() - startTime
+                    # self.playing_dict[note] = (sound, timing)
+                    # TODO 是否加参数进行处理音色
+                    # 音量处理
+                    sound.set_volume(item.volume)
+                    sound.play()
+                    # TODO 录音状态下，将该部分写入缓冲区
+                    # 添加GPIO操作，包括关灯开灯和数字显示
+                    if isRPi:
+                        Piano_SAKS.ledOn(item.tune)
+                        Piano_SAKS.digitalPlay(item.tune)
+                except:
+                    pass
+
 
             else:
-                # 是结束的音符，找到相应的音符进行结束处理
-                if item in self.playing_dict.keys():
-                    # 获取上一个音符信息，第一个是channel，第二个是时间戳
-                    lastPlay = self.playing_dict.pop(item)
-                    sound = lastPlay[0]
-                    # TODO 关于fadeout，暂时使用500ms常数
-                    sound.stop()
+                try:
+                    # 是结束的音符，找到相应的音符进行结束处理
+                    sound = item.channel.sound_dict[item.tune]
+                    sound.fadeout(600)
                     timing = time.time() - startTime
                     # TODO 录音状态下，将该部分写入缓冲区
-                    # TODO 添加GPIO操作
+                    # 添加GPIO操作，开灯关灯数字显示
+                    if isRPi:
+                        Piano_SAKS.ledOff(item.tune)
+                except:
+                    pass
 
 
 if __name__ == "__main__":
