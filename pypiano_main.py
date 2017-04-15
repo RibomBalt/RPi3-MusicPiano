@@ -382,6 +382,7 @@ if __name__ == "__main__":
     mixer_thread=threading.Thread(target=mixer.sound_process)
     key_thread = threading.Thread(target=key_channel.key_input)
     screen = pygame.display.set_mode((320, 240), 0, 32)
+    pygame.display.set_caption('RPi Piano')
     mixer_thread.start()
     # key_thread.start()
     if isRPi:
