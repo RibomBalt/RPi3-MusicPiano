@@ -68,7 +68,7 @@ key2note = {
 
 # 乐器列表
 # TODO 随音源库的丰富，动态添加
-instruments = ['piano', ]
+instruments = ['piano', 'harp', 'violin', 'flute', 'musicbox', 'trumpet']
 
 
 class note:
