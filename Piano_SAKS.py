@@ -10,6 +10,9 @@ temp = None
 on_lights = queue.Queue()
 stop = False
 
+button_time = 0
+
+
 def led_off_first(func):
     '''
     装饰器，先关
@@ -86,6 +89,18 @@ def displayTime(relative = True):
             timeStr = '%s%s' % seconds2minute(second=t)
             SAKS.digital_display.show(timeStr)
         cleanUp()
+
+
+def display_count():
+    '''
+    展示按键次数的程序
+    :return: 
+    '''
+    global button_time
+    while not stop:
+        SAKS.digital_display.show(str(button_time % 10000).zfill(4))
+        time.sleep(0.1)
+
 
 def cleanUp():
     SAKS.ledrow.off()
