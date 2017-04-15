@@ -9,7 +9,9 @@ soundToNum = {'C':1,'D':2,'E':3,'F':4,'G':5,'A':6,'B':7,'+':0}
 temp = None
 on_lights = queue.Queue()
 stop = False
+
 button_time = 0
+
 
 def led_off_first(func):
     '''
@@ -87,6 +89,7 @@ def displayTime(relative = True):
             timeStr = '%s%s' % seconds2minute(second=t)
             SAKS.digital_display.show(timeStr)
         cleanUp()
+
 
 def display_count():
     '''

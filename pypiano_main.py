@@ -68,7 +68,9 @@ key2note = {
 
 # 乐器列表
 # TODO 随音源库的丰富，动态添加
+
 instruments = ['piano', 'harp', 'violin', 'flute', 'musicbox', 'trumpet']
+
 
 
 class note:
@@ -219,7 +221,9 @@ class music_channel:
                             if isRPi:
                                 # 如果在树莓派上，全部亮起表示正在更换乐器中
                                 Piano_SAKS.SAKS.ledrow.on()
+
                                 Piano_SAKS.button_time = 0
+
                             self.sound_dict.clear()
                             # 获取下一个乐器。暂时不使用GUI调整乐器
                             newIndex = (instruments.index(self.instrument) + 1) % len(instruments)
@@ -355,7 +359,9 @@ class music_mixer:
                     # 添加GPIO操作，包括关灯开灯和数字显示
                     if isRPi:
                         threading.Thread(target=Piano_SAKS.ledOn, args=(item.tune,)).start()
+
                         Piano_SAKS.button_time+=1
+
                 except Exception as e:
                     print(e)
 
@@ -382,10 +388,14 @@ if __name__ == "__main__":
     mixer_thread=threading.Thread(target=mixer.sound_process)
     key_thread = threading.Thread(target=key_channel.key_input)
     screen = pygame.display.set_mode((320, 240), 0, 32)
+
     pygame.display.set_caption('RPi Piano')
+
     mixer_thread.start()
     # key_thread.start()
     if isRPi:
-        # 展示时间的操作
+        # 展示总按键的次数，Tab键更换乐器时可以重置
+
         threading.Thread(target=Piano_SAKS.display_count).start()
+
     key_channel.key_input()
