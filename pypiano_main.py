@@ -78,17 +78,19 @@ class note:
     作为键盘事件传入的信息，等待主线程处理
     '''
 
-    def __init__(self, channel, tune: str, isStart: bool = True, volume: float = 1.0):
+    def __init__(self, channel, tune: str, isStart: bool = True, volume: float = 1.0, stretch = False):
         '''
         初始化一个音符
         :param channel: music_channel对象，表示发出此音符的频道，借以获得乐器
         :param tune: 一个字符串，表示音符音名。和音源文件名字对应
         :param isStart: 是否开始或结束。可能会同时传入同一个乐器两次开始符。
+        :param stretch: 是否延音，默认为False
         '''
         self.channel = channel
         self.tune = tune
         self.isStart = isStart
         self.volume = volume
+        self.stretch = stretch
 
     def __hash__(self):
         return id(self)
@@ -191,19 +193,19 @@ class music_channel:
                             press_list = pygame.key.get_pressed()
                             space_pressed = press_list[K_SPACE]
                             alt_pressed = press_list[K_LALT]
+                            # 延音踏板
+                            shift_pressed = press_list[K_LSHIFT]
                             del press_list
                             # 获得映射列表对应的音名（未改变八度）
                             note_name = key2note[(event.key, space_pressed)]
-                            if octave != 0:
-                                # 对八度标识符的调整
-                                note_name = str(octave + int(note_name[0])) + note_name[1:]
+                            
                             if note_name not in self.sound_dict.keys():
                                 # 如果没有在音符列表中，则直接放弃
                                 continue
                             # 用alt做弱音踏板
                             self.volume = 0.6 if alt_pressed else 1
                             # 我们终于做好了预处理，可以创建音符了！
-                            newNote = note(self, note_name, True, self.volume)
+                            newNote = note(self, note_name, True, self.volume, shift_pressed)
                             # 放进“正在播放”字典中
                             down_dict[event.key] = newNote
                             # 将音符和相关信息放进队列
@@ -364,7 +366,9 @@ class music_mixer:
                 try:
                     # 是结束的音符，找到相应的音符进行结束处理
                     sound = item.channel.sound_dict[item.tune]
-                    sound.fadeout(600)
+                    if not item.stretch:
+                        # 非延音，则逐渐消失
+                        sound.fadeout(600)
                     timing = time.time() - startTime
                     # TODO 录音状态下，将该部分写入缓冲区
                     # 添加GPIO操作，开灯关灯数字显示
